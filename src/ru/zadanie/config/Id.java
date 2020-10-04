@@ -7,7 +7,7 @@ public class Id {
 
     public static synchronized String createID()
     {
-        String uniqueId = UUID.randomUUID().toString() + id++;
+        String uniqueId =  id++ + "_" + UUID.randomUUID().toString();
         return uniqueId;
     }
 }
