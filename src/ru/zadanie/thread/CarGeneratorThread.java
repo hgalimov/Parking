@@ -1,15 +1,14 @@
 package ru.zadanie.thread;
 
 import ru.zadanie.config.CarType;
-import ru.zadanie.main.App;
 import ru.zadanie.model.Car;
 import ru.zadanie.model.LightCar;
 import ru.zadanie.model.Truck;
-import static ru.zadanie.main.App.*;
 
-import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static ru.zadanie.config.RandomCarType.generateCarType;
+import static ru.zadanie.main.App.generatedList;
 
 public class CarGeneratorThread extends Thread {
 
@@ -24,8 +23,18 @@ public class CarGeneratorThread extends Thread {
 
     @Override
     public void run() {
-        while (System.currentTimeMillis() < beginTime + interval) {
-            generateCar();
+        while (true) {
+            long rndTime = ThreadLocalRandom.current().nextLong(interval);
+            if (beginTime + rndTime < System.currentTimeMillis() && System.currentTimeMillis() < beginTime + interval) {
+                generateCar();
+                beginTime = System.currentTimeMillis();
+                System.out.println(rndTime + " " +System.currentTimeMillis());
+                try {
+                    Thread.sleep(rndTime);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -43,6 +52,6 @@ public class CarGeneratorThread extends Thread {
                 generatedList.add(truck);
                 break;
         }
-        System.out.println(generatedList.size() + " " + getName() + " " + carType);
+        //System.out.println(generatedList.size() + " " + getName() + " " + carType);*/
     }
 }
