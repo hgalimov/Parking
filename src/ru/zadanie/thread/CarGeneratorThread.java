@@ -1,6 +1,7 @@
 package ru.zadanie.thread;
 
 import ru.zadanie.config.CarType;
+import ru.zadanie.logging.Log;
 import ru.zadanie.model.Car;
 import ru.zadanie.model.LightCar;
 import ru.zadanie.model.Truck;
@@ -14,25 +15,24 @@ public class CarGeneratorThread extends Thread {
 
     private long beginTime;
     private long interval;
+    private Log log;
 
 
     public CarGeneratorThread(long beginTime, long interval) {
         this.interval = interval;
         this.beginTime = beginTime;
+        log = new Log();
     }
 
     @Override
     public void run() {
         while (true) {
             long rndTime = ThreadLocalRandom.current().nextLong(interval);
-            if (beginTime + rndTime < System.currentTimeMillis() && System.currentTimeMillis() < beginTime + interval) {
-                generateCar();
-                beginTime = System.currentTimeMillis();
-                System.out.println(rndTime + " " +System.currentTimeMillis());
-                try {
-                    Thread.sleep(rndTime);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+            while (true) {
+                if (beginTime + rndTime <= System.nanoTime() && System.nanoTime() < beginTime + interval) {
+                    beginTime = System.nanoTime();
+                    generateCar();
+                    break;
                 }
             }
         }
@@ -43,15 +43,16 @@ public class CarGeneratorThread extends Thread {
         switch (carType) {
             case LIGHT_CAR:
                 Car lightCar = new LightCar();
-                System.out.println(lightCar.getId() + " " + lightCar.getSize() + " " + lightCar.getType());
+                log.logInfo(lightCar.getType().toString() +
+                        " c id = " + lightCar.getId() + " встал в очередь на въезд.");
                 generatedList.add(lightCar);
                 break;
             case TRUCK:
                 Car truck = new Truck();
-                System.out.println(truck.getId() + " " + truck.getSize() + " " + truck.getType());
+                log.logInfo(truck.getType().toString() + " c id = " +
+                        truck.getId() + " встал в очередь на въезд.");
                 generatedList.add(truck);
                 break;
         }
-        //System.out.println(generatedList.size() + " " + getName() + " " + carType);*/
     }
 }
