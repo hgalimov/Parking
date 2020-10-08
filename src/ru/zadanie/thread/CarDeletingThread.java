@@ -1,30 +1,32 @@
 package ru.zadanie.thread;
 
 import ru.zadanie.logging.Log;
-import ru.zadanie.model.Car;
+import ru.zadanie.model.Parking;
 
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
-import static ru.zadanie.main.App.inParkingList;
-
-public class CarDeletingThread extends Thread{
+public class CarDeletingThread extends Thread {
     private long beginTime;
     private long interval;
     private Log log;
+    private Parking parking;
 
+    private CarDeletingThread() {
 
-    public CarDeletingThread(long beginTime, long interval) {
+    }
+
+    public CarDeletingThread(long beginTime, long interval,Parking parking) {
         this.interval = interval;
         this.beginTime = beginTime;
+        this.parking = parking;
         log = new Log();
     }
 
     @Override
     public void run() {
         while (true) {
-            long rndTime = (long) (Math.random() * interval);
-            while (true){
+            long rndTime = ThreadLocalRandom.current().nextLong(interval);
+            while (true) {
                 if (beginTime + rndTime <= System.nanoTime() && System.nanoTime() < beginTime + interval) {
                     beginTime = System.nanoTime();
                     deleteCar();
@@ -35,11 +37,6 @@ public class CarDeletingThread extends Thread{
     }
 
     private synchronized void deleteCar() {
-        int size = inParkingList.size();
-        if (size > 0) {
-            Car car = inParkingList.remove(new Random().nextInt(size));
-            log.logInfo(car.getType().toString() + " c id = " +
-                    car.getId() + " покинул парковку.");
-        }
+        parking.dltCar(log);
     }
 }

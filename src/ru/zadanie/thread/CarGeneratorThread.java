@@ -8,6 +8,7 @@ import ru.zadanie.model.Truck;
 
 import java.util.concurrent.ThreadLocalRandom;
 
+
 import static ru.zadanie.config.RandomCarType.generateCarType;
 import static ru.zadanie.main.App.generatedList;
 
@@ -16,11 +17,13 @@ public class CarGeneratorThread extends Thread {
     private long beginTime;
     private long interval;
     private Log log;
+    private int maxSizeGen;
 
 
-    public CarGeneratorThread(long beginTime, long interval) {
+    public CarGeneratorThread(long beginTime, long interval, int maxSizeGen) {
         this.interval = interval;
         this.beginTime = beginTime;
+        this.maxSizeGen = maxSizeGen;
         log = new Log();
     }
 
@@ -29,6 +32,7 @@ public class CarGeneratorThread extends Thread {
         while (true) {
             long rndTime = ThreadLocalRandom.current().nextLong(interval);
             while (true) {
+                checkGenListSize();
                 if (beginTime + rndTime <= System.nanoTime() && System.nanoTime() < beginTime + interval) {
                     beginTime = System.nanoTime();
                     generateCar();
@@ -53,6 +57,12 @@ public class CarGeneratorThread extends Thread {
                         truck.getId() + " встал в очередь на въезд.");
                 generatedList.add(truck);
                 break;
+        }
+    }
+    private synchronized void checkGenListSize(){
+        if (generatedList.size() >= maxSizeGen) {
+            log.logErr("CARMAGEDDON!!!");
+            System.exit(0);
         }
     }
 }

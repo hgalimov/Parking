@@ -2,14 +2,19 @@ package ru.zadanie.thread;
 
 import ru.zadanie.logging.Log;
 import ru.zadanie.model.Car;
+import ru.zadanie.model.Parking;
 
 import static ru.zadanie.main.App.generatedList;
-import static ru.zadanie.main.App.inParkingList;
 
 public class CarMovingToParkThread extends Thread {
     private Log log;
+    private Parking parking;
 
-    public CarMovingToParkThread(){
+    private CarMovingToParkThread(){
+
+    }
+    public CarMovingToParkThread(Parking parking) {
+        this.parking = parking;
         log = new Log();
     }
 
@@ -21,11 +26,11 @@ public class CarMovingToParkThread extends Thread {
     }
 
     private synchronized void moveCarToPark() {
-        if (generatedList.peek() != null) {
-            Car car = generatedList.poll();
-            inParkingList.add(car);
-            log.logInfo(car.getType().toString() + " c id = " +
-                    car.getId() + " встал в очередь на въезд.");
+        Car car = generatedList.peek();
+        if (car!= null) {
+            if (parking.addCar(car, log)) {
+                generatedList.remove(car);
+            }
         }
     }
 }

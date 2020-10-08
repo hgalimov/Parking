@@ -1,32 +1,38 @@
 package ru.zadanie.model;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import ru.zadanie.config.CarType;
+import ru.zadanie.logging.Log;
+
+import java.util.*;
 
 public class Parking {
-    private int size;
+    private int parkingSize;
     private int curLoad;
     private int lightCarCount;
     private int truckCount;
-    private List<Car> inParkingList = new ArrayList<>();
+    private int freePlace;
+    private List<Car> inParkingList;
 
-    public Parking(int size, List<Car> inParkingList) {
-        this.size = size;
-        this.inParkingList = inParkingList;
+    public Parking(int parkingSize) {
+        this.parkingSize = parkingSize;
+        freePlace = parkingSize;
+        inParkingList = new ArrayList<>();
     }
 
     private Parking() {
 
     }
 
+    public int getFreePlace() {
+        return freePlace;
+    }
+
     public int getSize() {
-        return size;
+        return parkingSize;
     }
 
     public void setSize(int size) {
-        this.size = size;
+        this.parkingSize = parkingSize;
     }
 
     public int getCurLoad() {
@@ -52,10 +58,46 @@ public class Parking {
     public void setTruckCount(int truckCount) {
         this.truckCount = truckCount;
     }
-    public void dltCar(){
+
+    public void dltCar(Log log) {
+        int size = inParkingList.size();
+        if (size > 0) {
+            Car car = inParkingList.remove(new Random().nextInt(size));
+            curLoad -= car.getSize();
+            freePlace += car.getSize();
+            CarType carType = car.getType();
+            if (carType.equals(CarType.LIGHT_CAR)) {
+                lightCarCount--;
+            } else if (
+                    carType.equals(CarType.TRUCK)) {
+                truckCount--;
+            }
+            log.logInfo(car.getType().toString() + " c id = " +
+                    car.getId() + " покинул парковку.");
+        }
 
     }
-    public void crtCar(){
 
+    public boolean addCar(Car car, Log log) {
+        if (car != null) {
+            int carSize = car.getSize();
+            if (carSize + curLoad <= parkingSize) {
+                if (inParkingList.add(car)) {
+                    CarType carType = car.getType();
+                    if (carType.equals(CarType.LIGHT_CAR)) {
+                        lightCarCount++;
+                    } else if (
+                            carType.equals(CarType.TRUCK)) {
+                        truckCount++;
+                    }
+                    curLoad += carSize;
+                    freePlace -= carSize;
+                    log.logInfo(carType.toString() + " c id = " +
+                            car.getId() + " припарковался.");
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

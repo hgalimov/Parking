@@ -2,6 +2,7 @@ package ru.zadanie.main;
 
 import ru.zadanie.logging.Log;
 import ru.zadanie.model.Car;
+import ru.zadanie.model.Parking;
 import ru.zadanie.thread.CarDeletingThread;
 import ru.zadanie.thread.CarGeneratorThread;
 import ru.zadanie.thread.CarMovingToParkThread;
@@ -15,7 +16,6 @@ import static ru.zadanie.config.Constants.*;
 public class App {
 
     public static Queue<Car> generatedList = new LinkedList<>();
-    public static List<Car> inParkingList = new ArrayList<>();
     private static int parkingSize;
     private static int maxSizeGen;
     private static long genInterval;
@@ -26,20 +26,15 @@ public class App {
     public static void main(String[] args) {
         log = new Log();
         inputData();
-        CarGeneratorThread carGeneratorThread = new CarGeneratorThread(System.nanoTime(), genInterval);
+        Parking parking = new Parking(parkingSize);
+        CarGeneratorThread carGeneratorThread = new CarGeneratorThread(System.nanoTime(), genInterval, maxSizeGen);
         carGeneratorThread.start();
-        CarMovingToParkThread carMovingToParkThread = new CarMovingToParkThread();
+        CarMovingToParkThread carMovingToParkThread = new CarMovingToParkThread(parking);
         carMovingToParkThread.start();
-        CarDeletingThread carDeletingThread = new CarDeletingThread(System.currentTimeMillis(), dltInterval);
+        CarDeletingThread carDeletingThread = new CarDeletingThread(System.nanoTime(), dltInterval, parking);
         carDeletingThread.start();
-        ParkingInfoThread parkingInfoThread = new ParkingInfoThread();
+        ParkingInfoThread parkingInfoThread = new ParkingInfoThread(parking);
         parkingInfoThread.start();
-
-        synchronized (generatedList) {
-            if (generatedList.size() >= maxSizeGen) {
-                log.logErr("CARMAGEDDON!!!");
-            }
-        }
     }
 
     private static void inputData() {
